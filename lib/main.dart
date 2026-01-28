@@ -1,121 +1,369 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'presentation/bloc/growth_bloc.dart';
+import 'presentation/bloc/growth_event.dart';
+import 'presentation/bloc/growth_state.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const GrowthLabApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class GrowthLabApp extends StatelessWidget {
+  const GrowthLabApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+    return BlocProvider(
+      create: (context) => GrowthBloc(),
+      child: MaterialApp(
+        title: 'GrowthLab Productivity',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.indigo,
+            brightness: Brightness.light,
+          ),
+          cardTheme: CardTheme(
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          ),
+        ),
+        home: const GrowthPage(),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+class GrowthPage extends StatelessWidget {
+  const GrowthPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+    return BlocBuilder<GrowthBloc, GrowthState>(
+      builder: (context, state) {
+        // Determinamos si estamos en el estado de sincronización de 7 segundos
+        final isSyncing = state.status == GrowthStatus.loading && 
+                         state.logs.isNotEmpty && 
+                         state.logs.first.contains('Sync');
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFF7F9FC),
+          body: Stack(
+            children: [
+              CustomScrollView(
+                slivers: [
+                  const SliverAppBar.large(
+                    backgroundColor: Color(0xFFF7F9FC),
+                    title: Text(
+                      'GrowthLab Pro', 
+                      style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -1)
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const _HeaderSubtitle(),
+                          const SizedBox(height: 24),
+                          _ActionGrid(),
+                          const SizedBox(height: 24),
+                          const _GenerateButton(),
+                          const SizedBox(height: 32),
+                          _TaskListSection(tasks: state.tasks),
+                          const SizedBox(height: 100),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (isSyncing) const _SyncOverlay(),
+            ],
+          ),
+          bottomNavigationBar: _BottomNav(currentIndex: state.activeTab),
+        );
+      },
+    );
+  }
+}
+
+class _HeaderSubtitle extends StatelessWidget {
+  const _HeaderSubtitle();
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'SANDBOX DE PRODUCTIVIDAD',
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            color: Colors.indigo.withOpacity(0.6),
+            letterSpacing: 2,
+          ),
+        ),
+        const Text(
+          'Orquestación CleverTap + Firebase',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.slate),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionGrid extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 1.1,
+      children: [
+        _GrowthCard(
+          label: 'Onboard User',
+          subtitle: 'IDENTIDAD NATIVA',
+          icon: Icons.person_add_rounded,
+          color: Colors.indigo,
+          onTap: () => context.read<GrowthBloc>().add(CreateUserRequested()),
+        ),
+        _GrowthCard(
+          label: 'Update DOB',
+          subtitle: 'PROFILE PUSH',
+          icon: Icons.cake_rounded,
+          color: Colors.emerald,
+          onTap: () => context.read<GrowthBloc>().add(CompleteProfileRequested()),
+        ),
+        _GrowthCard(
+          label: 'Track Hola',
+          subtitle: 'CUSTOM EVENT',
+          icon: Icons.bolt_rounded,
+          color: Colors.amber.shade800,
+          onTap: () => context.read<GrowthBloc>().add(TrackEventRequested()),
+        ),
+        _GrowthCard(
+          label: 'Sync 7s',
+          subtitle: 'REST CLOUD',
+          icon: Icons.cloud_sync_rounded,
+          color: Colors.rose,
+          onTap: () => context.read<GrowthBloc>().add(SyncDataRequested()),
+        ),
+      ],
+    );
+  }
+}
+
+class _GrowthCard extends StatelessWidget {
+  final String label;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _GrowthCard({
+    required this.label, 
+    required this.subtitle, 
+    required this.icon, 
+    required this.color, 
+    required this.onTap
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: color,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(28),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: Colors.white, size: 32),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    subtitle, 
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.6), 
+                      fontSize: 8, 
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1
+                    )
+                  ),
+                  Text(
+                    label, 
+                    style: const TextStyle(
+                      color: Colors.white, 
+                      fontWeight: FontWeight.w900,
+                      fontSize: 13
+                    )
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+    );
+  }
+}
+
+class _GenerateButton extends StatelessWidget {
+  const _GenerateButton();
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton(
+        onPressed: () => context.read<GrowthBloc>().add(GenerateTasksRequested()),
+        style: FilledButton.styleFrom(
+          backgroundColor: Colors.slate.shade900,
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        ),
+        child: const Text(
+          'GENERAR LISTA PERFORMANCE (400)',
+          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
+        ),
+      ),
+    );
+  }
+}
+
+class _TaskListSection extends StatelessWidget {
+  final List<String> tasks;
+  const _TaskListSection({required this.tasks});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: Colors.slate.shade100),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'COLA DE TAREAS',
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.slate, letterSpacing: 1),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(color: Colors.indigo.shade50, borderRadius: BorderRadius.circular(12)),
+                child: Text(
+                  '${tasks.length}',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.indigo.shade700),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (tasks.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 40),
+              child: Center(
+                child: Text('No hay tareas activas en el motor.', style: TextStyle(color: Colors.slate, fontSize: 12, fontStyle: FontStyle.italic)),
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: tasks.length > 5 ? 5 : tasks.length,
+              separatorBuilder: (context, index) => const Divider(height: 24, color: Color(0xFFF1F5F9)),
+              itemBuilder: (context, index) => Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: const BoxDecoration(color: Color(0xFFF1F5F9), shape: BoxShape.circle),
+                    alignment: Alignment.center,
+                    child: Text('${index + 1}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900)),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(tasks[index], style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.slate)),
+                ],
+              ),
+            ),
+          if (tasks.length > 5)
+            Padding(
+              padding: const EdgeInsets.top(16),
+              child: Text(
+                '+ ${tasks.length - 5} tareas adicionales optimizadas',
+                style: const TextStyle(fontSize: 10, color: Colors.indigo, fontWeight: FontWeight.w700),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomNav extends StatelessWidget {
+  final int currentIndex;
+  const _BottomNav({required this.currentIndex});
+
+  @override
+  Widget build(BuildContext context) {
+    return NavigationBar(
+      elevation: 0,
+      backgroundColor: Colors.white,
+      selectedIndex: currentIndex,
+      onDestinationSelected: (i) => context.read<GrowthBloc>().add(NavigationTabChanged(i)),
+      destinations: const [
+        NavigationDestination(icon: Icon(Icons.dashboard_rounded), label: 'Dash'),
+        NavigationDestination(icon: Icon(Icons.settings_suggest_rounded), label: 'Config'),
+        NavigationDestination(icon: Icon(Icons.code_rounded), label: 'Logs'),
+      ],
+    );
+  }
+}
+
+class _SyncOverlay extends StatelessWidget {
+  const _SyncOverlay();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white.withOpacity(0.9),
+      width: double.infinity,
+      height: double.infinity,
+      child: Center(
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('You have pushed the button this many times:'),
+            const SizedBox(
+              width: 48,
+              height: 48,
+              child: CircularProgressIndicator(strokeWidth: 5, color: Colors.rose),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'SINCRONIZANDO...',
+              style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 3, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              'Orquestación REST (7 segundos)',
+              style: TextStyle(color: Colors.slate.shade400, fontWeight: FontWeight.w600),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }

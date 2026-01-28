@@ -3,6 +3,18 @@
         android:label="growthlab_productivity"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- 🔹 CleverTap config -->
+        <meta-data
+            android:name="CLEVERTAP_ACCOUNT_ID"
+            android:value="TEST-9RZ-4WZ-967Z"/>
+
+        <meta-data
+            android:name="CLEVERTAP_TOKEN"
+            android:value="TEST-XXXXXX"/>
+
+        <meta-data
+            android:name="CLEVERTAP_REGION"
+            android:value="us1"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

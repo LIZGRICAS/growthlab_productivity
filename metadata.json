@@ -1,0 +1,9 @@
+{
+  "name": "GrowthLab Productivity Pro",
+  "description": "Enterprise-grade productivity sandbox with Firebase, REST, and CleverTap orchestration. Compilable for Android via Flutter.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation",
+    "microphone"
+  ]
+}

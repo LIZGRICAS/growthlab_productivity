@@ -5,6 +5,14 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+import java.util.Properties
+        import java.io.FileInputStream
+
+// Cargar credenciales de CleverTap desde local.properties
+val props = Properties().apply {
+    load(FileInputStream(rootProject.file("local.properties")))
+}
+
 android {
     namespace = "com.example.growthlab_productivity"
     compileSdk = flutter.compileSdkVersion
@@ -15,25 +23,26 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    // Kotlin DSL correcto
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = "17"
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.growthlab_productivity"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Placeholders de CleverTap
+        manifestPlaceholders["CLEVERTAP_ACCOUNT_ID"] = props.getProperty("CLEVERTAP_ACCOUNT_ID")
+        manifestPlaceholders["CLEVERTAP_TOKEN"]     = props.getProperty("CLEVERTAP_TOKEN")
+        manifestPlaceholders["CLEVERTAP_REGION"]    = props.getProperty("CLEVERTAP_REGION")
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
