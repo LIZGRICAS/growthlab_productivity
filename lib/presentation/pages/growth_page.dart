@@ -1,10 +1,12 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+// flutter_bloc is already imported above; no duplicate import needed
 import 'diagnostics_page.dart';
 import '../bloc/growth_bloc.dart';
 import '../bloc/growth_event.dart';
 import '../bloc/growth_state.dart';
+import '../navigation/router_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 // TODO: pega aquí EXACTAMENTE tu GrowthPage + widgets privados
 class GrowthPage extends StatelessWidget {
@@ -34,7 +36,18 @@ class GrowthPage extends StatelessWidget {
                     actions: [
                       IconButton(
                         icon: const Icon(Icons.bug_report_outlined),
-                        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DiagnosticsPage())),
+                        onPressed: () {
+                          // Try to obtain the RouterService from the DI tree; fall back to Navigator if absent.
+                          final providerWidget = context.findAncestorWidgetOfExactType<RepositoryProvider<RouterServiceInterface>>();
+                          if (providerWidget != null) {
+                            final router = RepositoryProvider.of<RouterServiceInterface>(context);
+                            if (router.isRegistered) {
+                              router.push('/diagnostics');
+                              return;
+                            }
+                          }
+                          Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DiagnosticsPage()));
+                        },
                         tooltip: 'Diagnostics',
                       ),
                     ],

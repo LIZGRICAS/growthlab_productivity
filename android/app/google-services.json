@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "358277570595",
+    "project_id": "appweb-54b05",
+    "storage_bucket": "appweb-54b05.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:358277570595:android:3cf2c10e1031c3a4a0d196",
+        "android_client_info": {
+          "package_name": "com.example.growthlab_productivity"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfBE-LiPt-SxsHgeRBR4aou03AGBfEQrc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

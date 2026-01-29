@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 import 'typed_clevertap.dart';
-import '../../domain/entities/user_profile.dart';
+import '../../domain/entities.dart';
 
 /// CleverTapDataSource - direct calls to the official `clevertap_plugin`.
 ///

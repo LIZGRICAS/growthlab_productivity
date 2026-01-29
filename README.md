@@ -67,6 +67,37 @@ graph TD
 
 ---
 
+## 🔐 Configuración Firebase (Android / iOS / Web)
+
+Este repositorio incluye uso de Firestore, Remote Config y Storage. Para que los servicios funcionen en Android/iOS, debe provisionar las credenciales de Firebase en cada plataforma.
+
+1. Generar `firebase_options.dart` (recomendado):
+
+```bash
+dart pub global activate flutterfire_cli
+flutterfire configure --project="<your-project-id>"
+```
+
+2. Alternativa (Android/iOS manual):
+    - Desde Firebase Console descargue `google-services.json` y colóquelo en `android/app/`.
+    - Desde Firebase Console descargue `GoogleService-Info.plist` y colóquelo en `ios/Runner/`.
+
+3. Remote Config:
+    - `lib/data/datasources/firebase_datasource.dart` ya inicializa `FirebaseRemoteConfig` y aplica `fetchAndActivate()`.
+    - Defina parámetros por defecto en el código o configure en la consola de Firebase para producción/QA.
+
+4. Storage:
+    - Añadido `lib/data/datasources/firebase_storage_datasource.dart` con helpers `uploadBytes` y `getDownloadUrl`.
+    - Use `AnalyticsRepository.uploadProfilePhoto(...)` para subir imágenes y obtener URL.
+
+5. App Distribution (nota):
+    - App Distribution requiere configurar el plugin de Gradle en Android y subir builds desde Firebase CLI o Fastlane.
+    - No se incluyen credenciales públicas en este repositorio; siga la guía oficial: https://firebase.google.com/products/app-distribution
+
+Si necesitas, puedo intentar ejecutar `flutterfire configure` aquí (requiere acceso a la cuenta Firebase) o generar instrucciones más específicas para tu proyecto.
+
+---
+
 ### Senior Reviewer Note
 
 Esta implementación ha sido auditada para garantizar que no existan desviaciones arquitectónicas ni inconsistencias en el formato de datos enviado a los servicios de engagement.

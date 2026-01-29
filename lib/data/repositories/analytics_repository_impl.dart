@@ -1,17 +1,21 @@
-import '../../domain/entities/user_profile.dart';
+import '../../domain/entities.dart';
+import 'dart:typed_data';
 import '../../domain/repositories/analytics_repository.dart';
 import '../datasources/clevertap_datasource.dart';
 import '../datasources/firebase_datasource.dart';
+import '../datasources/firebase_storage_datasource.dart';
 import '../datasources/rest_datasource.dart';
 
 class AnalyticsRepositoryImpl implements AnalyticsRepository {
   final CleverTapDataSource cleverTap;
   final FirebaseDataSource firebase;
+  final FirebaseStorageDataSource storage;
   final RestDataSource rest;
 
   AnalyticsRepositoryImpl({
     required this.cleverTap,
     required this.firebase,
+    required this.storage,
     required this.rest,
   });
 
@@ -29,6 +33,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   @override
   Future<void> trackProductivityEvent(String name, Map<String, dynamic> properties) async {
     await cleverTap.trackEvent(name, properties);
+  }
+
+  @override
+  Future<String> uploadProfilePhoto(String identity, List<int> bytes, {String? contentType}) async {
+    final path = 'profiles/$identity/profile_photo_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final url = await storage.uploadBytes(path, Uint8List.fromList(bytes), contentType: contentType ?? 'image/jpeg');
+    return url;
   }
 
   @override

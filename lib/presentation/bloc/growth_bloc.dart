@@ -1,9 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'growth_event.dart';
 import 'growth_state.dart';
-import '../../domain/entities/user_profile.dart';
+import '../../domain/entities.dart';
 import '../../domain/usecases/growth_usecases.dart';
+import '../../domain/repositories/analytics_repository.dart';
 import '../../data/repositories/analytics_repository_impl.dart';
+import '../../data/datasources/firebase_storage_datasource.dart';
 import '../../data/datasources/clevertap_datasource.dart';
 import '../../data/datasources/firebase_datasource.dart';
 import '../../data/datasources/rest_datasource.dart';
@@ -12,30 +14,35 @@ class GrowthBloc extends Bloc<GrowthEvent, GrowthState> {
   final CreateUserProfileUseCase _createUser;
   final TrackProductivityUseCase _trackEvent;
   final SyncDataUseCase _syncData;
-  final AnalyticsRepositoryImpl _repo;
+  final AnalyticsRepository _repo;
 
-  GrowthBloc() 
-    : _repo = AnalyticsRepositoryImpl(
-        cleverTap: CleverTapDataSource(),
-        firebase: FirebaseDataSource(),
-        rest: RestDataSource(),
-      ),
-      _createUser = CreateUserProfileUseCase(AnalyticsRepositoryImpl(
-        cleverTap: CleverTapDataSource(),
-        firebase: FirebaseDataSource(),
-        rest: RestDataSource(),
-      )),
-      _trackEvent = TrackProductivityUseCase(AnalyticsRepositoryImpl(
-        cleverTap: CleverTapDataSource(),
-        firebase: FirebaseDataSource(),
-        rest: RestDataSource(),
-      )),
-      _syncData = SyncDataUseCase(AnalyticsRepositoryImpl(
-        cleverTap: CleverTapDataSource(),
-        firebase: FirebaseDataSource(),
-        rest: RestDataSource(),
-      )),
-      super(const GrowthState()) {
+  /// Allows injecting a pre-built `AnalyticsRepositoryImpl` for testing.
+  GrowthBloc({AnalyticsRepository? repository})
+      : _repo = repository ?? AnalyticsRepositoryImpl(
+          cleverTap: CleverTapDataSource(),
+          firebase: FirebaseDataSource(),
+          storage: FirebaseStorageDataSource(),
+          rest: RestDataSource(),
+        ),
+        _createUser = CreateUserProfileUseCase(repository ?? AnalyticsRepositoryImpl(
+          cleverTap: CleverTapDataSource(),
+          firebase: FirebaseDataSource(),
+          storage: FirebaseStorageDataSource(),
+          rest: RestDataSource(),
+        )),
+        _trackEvent = TrackProductivityUseCase(repository ?? AnalyticsRepositoryImpl(
+          cleverTap: CleverTapDataSource(),
+          firebase: FirebaseDataSource(),
+          storage: FirebaseStorageDataSource(),
+          rest: RestDataSource(),
+        )),
+        _syncData = SyncDataUseCase(repository ?? AnalyticsRepositoryImpl(
+          cleverTap: CleverTapDataSource(),
+          firebase: FirebaseDataSource(),
+          storage: FirebaseStorageDataSource(),
+          rest: RestDataSource(),
+        )),
+        super(const GrowthState()) {
     
     on<CreateUserRequested>(_onCreateUser);
     on<CompleteProfileRequested>(_onCompleteProfile);
