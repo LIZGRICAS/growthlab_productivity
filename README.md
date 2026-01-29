@@ -61,9 +61,81 @@ graph TD
 
 ## ⚙️ Configuración y Ejecución
 
-1.  **Dependencias:** Ejecute `flutter pub get`.
-2.  **Android/iOS:** Asegure la configuración de `google-services.json` y los permisos de CleverTap en `AndroidManifest.xml` / `Info.plist`.
-3.  **Ambiente:** El SDK está configurado para apuntar al Dashboard de QA (Sandbox).
+1. **Dependencias:** Ejecute `flutter pub get`.
+1. **Android/iOS:** Asegure la configuración de `google-services.json` y los permisos de CleverTap en `AndroidManifest.xml` / `Info.plist`.
+1. **Ambiente:** El SDK está configurado para apuntar al Dashboard de QA (Sandbox).
 
 ---
-**Senior Reviewer Note:** Esta implementación ha sido auditada para garantizar que no existan desviaciones arquitectónicas ni inconsistencias en el formato de datos enviado a los servicios de engagement.
+
+### Senior Reviewer Note
+
+Esta implementación ha sido auditada para garantizar que no existan desviaciones arquitectónicas ni inconsistencias en el formato de datos enviado a los servicios de engagement.
+
+---
+
+## 🧪 Cómo probar localmente (tests y ejecución)
+
+Pasos rápidos para reproducir el entorno y validar requisitos automáticamente:
+
+1. Instale dependencias:
+
+```bash
+flutter pub get
+```
+
+1. Ejecutar análisis estático:
+
+```bash
+flutter analyze
+```
+
+1. Ejecutar tests unitarios/widget (incluye el widget smoke test):
+
+```bash
+flutter test --coverage
+```
+
+1. Ejecutar en dispositivo Android conectado:
+
+```bash
+flutter run -d android
+```
+
+---
+
+## 🔌 Integración CleverTap (estado actual y cómo habilitar el SDK real)
+
+- Estado actual: el repositorio contiene un wrapper Dart estable en `lib/data/datasources/clevertap_datasource.dart` que utiliza `MethodChannel('clevertap_plugin')` para invocar la implementación nativa. Esto permite ejecutar tests y la app en entornos donde el plugin nativo no esté presente (fallback con logging y latencia simulada).
+
+- Credenciales de Sandbox: colocadas en `android/local.properties` como `CLEVERTAP_ACCOUNT_ID`, `CLEVERTAP_TOKEN`, `CLEVERTAP_REGION`.
+
+- Para usar directamente el plugin oficial (`clevertap_plugin`) en lugar del MethodChannel, reemplazar el contenido de `lib/data/datasources/clevertap_datasource.dart` por llamadas al SDK. Ejemplo mínimo:
+
+```dart
+import 'package:clevertap_plugin/clevertap_plugin.dart';
+
+class CleverTapDataSource {
+    Future<void> onUserLogin(UserProfile profile) async {
+        CleverTapPlugin.onUserLogin({
+            'Name': profile.name,
+            'Identity': profile.identity,
+            'Email': profile.email,
+            'Phone': profile.phone,
+        });
+    }
+
+    Future<void> profilePush(String identity, Map<String, dynamic> attrs) async {
+        CleverTapPlugin.profilePush(attrs);
+    }
+
+    Future<void> trackEvent(String name, Map<String, dynamic> props) async {
+        CleverTapPlugin.recordEvent(name, props: props);
+    }
+}
+```
+
+> Nota: después de cambiar a llamadas directas al plugin, ejecute `flutter clean` y `flutter pub get`, luego pruebe en un dispositivo real o emulador con los servicios nativos disponibles.
+
+---
+
+Si quieres, aplico la conversión automática del wrapper para usar `package:clevertap_plugin` (haría el cambio en `lib/data/datasources/clevertap_datasource.dart` y validaría `flutter analyze`/`flutter test`).

@@ -1,4 +1,5 @@
 
+import 'dart:developer' as developer;
 import '../domain/entities.dart';
 
 /// Implementación del Data Source para CleverTap.
@@ -17,18 +18,18 @@ class CleverTapDataSource {
     };
     
     await Future.delayed(const Duration(milliseconds: 800));
-    print('[CleverTap SDK] Profile pushed to TEST-MOVii Sandbox: $profile');
+    developer.log('[CleverTap SDK] Profile pushed to TEST-MOVii Sandbox: $profile', name: 'CleverTapSDK');
   }
 
   Future<void> updateProfile(String identity, Map<String, dynamic> data) async {
     await Future.delayed(const Duration(milliseconds: 600));
-    print('[CleverTap SDK] Profile update for Identity($identity): $data');
+    developer.log('[CleverTap SDK] Profile update for Identity($identity): $data', name: 'CleverTapSDK');
   }
 
   Future<void> trackEvent(String name, Map<String, dynamic> props) async {
     // REQUISITO INAMOVIBLE: Evento "Hola_mundo" con props específicas
     await Future.delayed(const Duration(milliseconds: 500));
-    print('[CleverTap SDK] Event Tracked: "$name" with properties: $props');
+    developer.log('[CleverTap SDK] Event Tracked: "$name" with properties: $props', name: 'CleverTapSDK');
   }
 }
 
