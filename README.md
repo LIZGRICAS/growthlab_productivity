@@ -94,7 +94,6 @@ flutterfire configure --project="<your-project-id>"
     - App Distribution requiere configurar el plugin de Gradle en Android y subir builds desde Firebase CLI o Fastlane.
     - No se incluyen credenciales públicas en este repositorio; siga la guía oficial: https://firebase.google.com/products/app-distribution
 
-Si necesitas, puedo intentar ejecutar `flutterfire configure` aquí (requiere acceso a la cuenta Firebase) o generar instrucciones más específicas para tu proyecto.
 
 ---
 
@@ -164,9 +163,3 @@ class CleverTapDataSource {
     }
 }
 ```
-
-> Nota: después de cambiar a llamadas directas al plugin, ejecute `flutter clean` y `flutter pub get`, luego pruebe en un dispositivo real o emulador con los servicios nativos disponibles.
-
----
-
-Si quieres, aplico la conversión automática del wrapper para usar `package:clevertap_plugin` (haría el cambio en `lib/data/datasources/clevertap_datasource.dart` y validaría `flutter analyze`/`flutter test`).
