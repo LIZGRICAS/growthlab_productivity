@@ -44,3 +44,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /android/local.properties
+
+# Firebase generated options - do NOT commit secrets
+lib/firebase_options.dart
+
+# Native platform files
+android/google-services.json
+ios/GoogleService-Info.plist

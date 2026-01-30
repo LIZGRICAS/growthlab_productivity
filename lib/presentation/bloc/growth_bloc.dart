@@ -64,10 +64,10 @@ class GrowthBloc extends Bloc<GrowthEvent, GrowthState> {
     _log(emit, 'Iniciando Onboarding Senior...');
     
     final profile = UserProfile(
-      name: 'Lizbeth Grisales',
-      identity: '1029384756', // REQUISITO: String numérico puro
-      email: 'lgrisales.dev@example.com',
-      phone: '573001234567'
+      name: 'Lizbeth Grisales Castro',
+      identity: '1036626480', // REQUISITO: String numérico puro
+      email: 'lizgricas@gmail.con',
+      phone: '+573008333775'
     );
 
     try {
