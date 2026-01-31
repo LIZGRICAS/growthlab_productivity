@@ -41,6 +41,7 @@ dependencies:
   firebase_remote_config: 4.4.7
   firebase_storage: ^11.0.0
   http: ^1.1.2
+  clevertap_plugin: 3.6.0
 
 dev_dependencies:
   flutter_test:
