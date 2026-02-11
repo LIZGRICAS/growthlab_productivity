@@ -1,6 +1,7 @@
 
 import 'dart:developer' as developer;
-import '../domain/entities.dart';
+import '../domain/entities/user_profile.dart';
+import '../domain/entities/app_config.dart';
 
 /// Implementación del Data Source para CleverTap.
 /// 
@@ -43,7 +44,7 @@ class FirebaseDataSource {
     await Future.delayed(const Duration(milliseconds: 300));
     return const AppConfig(
       enablePremium: true, 
-      activeCampaign: 'Growth_Sprint_2025'
+      activeCampaign: 'Growth_Sprint_2025', syncThreshold: 10, // o 0, o el mínimo válido
     );
   }
 }

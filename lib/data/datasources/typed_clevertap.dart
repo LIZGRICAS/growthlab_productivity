@@ -1,10 +1,14 @@
+// Este es un wrapper tipado ligero alrededor del complemento CleverTap MethodChannel
+// Aísla:
+// MethodChannel
+// cambios de API del plugin
+// 📌 decisión para estabilidad. Evita conversiones dinámicas a la vez que preserva la compatibilidad en tiempo de ejecución con la implementación del complemento de la plataforma.
+
 import 'dart:developer' as developer;
 import 'package:flutter/services.dart';
 import 'diagnostics_logger.dart';
 
-/// Lightweight typed wrapper around the CleverTap plugin MethodChannel.
-/// This avoids dynamic casts while preserving runtime compatibility
-/// with the platform plugin implementation.
+
 class TypedCleverTap {
   static const MethodChannel _channel = MethodChannel('clevertap_plugin');
 

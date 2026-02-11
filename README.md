@@ -1,14 +1,43 @@
 
 # 🚀 GrowthLab Productivity
-### Senior Flutter Engineering Technical Assessment
 
-**GrowthLab Productivity** es una solución robusta diseñada para demostrar dominio senior en el ecosistema Flutter, aplicando **Clean Architecture**, el patrón **BLoC** e integración profesional con **CleverTap SDK**.
+**GrowthLab Productivity** es un MVP desarrollado en Flutter que demuestra implementación profesional de:
+
+- Clean Architecture
+- Patrón BLoC
+- Integración con CleverTap SDK
+- Separación estricta de responsabilidades
+- Diseño preparado para escalar
 
 ---
 
 ## 🏗️ Arquitectura y Principios de Diseño
 
-El proyecto sigue una separación estricta de responsabilidades para garantizar testabilidad y escalabilidad:
+El proyecto sigue una separación estricta de responsabilidades para garantizar testabilidad y escalabilidad, **Clean Architecture basada en capas (layered approach)**:
+
+La decisión de organizar por capas globales es intencional:  
+para un **MVP**, esta estructura permite claridad, rapidez de iteración y bajo acoplamiento sin introducir complejidad prematura.
+
+## 📂 Estructura Actual (Layered)
+
+```bash
+lib/
+│
+├── domain/
+│   ├── entities/
+│   ├── repositories/
+│   └── usecases/
+│
+├── data/
+│   ├── datasources/
+│   └── repositories/
+│
+└── presentation/
+    ├── bloc/
+    ├── pages/
+    └── navigation/
+
+```
 
 - **Domain Layer:** Entidades puras y lógica de negocio.
 - **Data Layer:** Repositorios y DataSources (CleverTap, Firebase, REST).
@@ -30,7 +59,129 @@ graph TD
     end
 ```
 
+### 🔹 Domain
+
+- Contiene las reglas del negocio:
+- Entidades inmutables
+- Casos de uso (UseCases)
+- Contratos (interfaces de repositorio)
+- Sin dependencias de Flutter ni SDKs externos
+- El dominio es independiente de la infraestructura.
+
+### 🔹 Data
+
+- Implementación concreta de los contratos definidos en domain/:
+- Integración con CleverTap
+- Firebase / Remote Config
+- Adaptación de datos externos a modelos de dominio
+- Fallbacks seguros ante fallos de red
+- La infraestructura nunca expone datos inválidos al dominio.
+
+### 🔹 Presentation
+
+- Capa responsable de estado y UI:
+- BLoC como coordinador
+- Eventos y estados inmutables (Equatable)
+- Sin acceso directo a SDKs
+- La UI no conoce detalles de infraestructura.
+
+## 🎯 Objetivo
+
+Demostrar:
+
+- Diseño arquitectónico sólido
+- Integración limpia con SDKs externos
+- Separación profesional de capas
+- Preparación real para escalamiento
+
+## 📌 Estado
+
+- MVP funcional
+- Preparado para modularización feature-first
+- Sin deuda estructural crítica
+  
 ---
+
+## 🏗 Principios Aplicados
+
+- Inversión de dependencias
+- Entidades inmutables
+- Casos de uso como orquestadores
+- Infraestructura desacoplada
+- Estados previsibles (BLoC + Equatable)
+- Fallbacks seguros ante fallas externas
+
+## El flujo de configuración- creación
+
+Este flujo Ocurre **una sola vez**, al iniciar la app:
+
+```mermaid
+graph TD
+    A[main.dart<br/>Composition Root] --> B[Create DataSources]
+    B --> C[Create Repository Implementations]
+    C --> D[Inject UseCases]
+    D --> E[Inject BLoC]
+    E --> F[Build UI]
+```
+
+ 📌 Características
+
+- Se construyen implementaciones concretas.
+- Se inyectan dependencias hacia capas internas.
+- No hay llamadas de negocio.
+- No hay lógica de dominio ejecutándos
+- Este flujo existe únicamente para cumplir la Dependency Rule
+
+## El flujo real de Llamadas en runtime
+
+Este flujo ocurre cada vez que el usuario interactúa con la aplicación.
+
+### 1️⃣ Flujo descendente (request flow)
+
+```mermaid
+graph TD
+    W[Widget] --> B[Bloc]
+    B --> U[Use Case]
+    U --> R[Repository<br/>(Domain Contract)]
+    R --> I[Infrastructure<br/>(API / DB / Cache)]
+
+```
+
+1. El usuario dispara un evento.
+2. El BLoC ejecuta un Use Case.
+3. El Use Case invoca el repositorio (contrato del dominio).
+4. La infraestructura ejecuta la operación real.
+
+### 2️⃣ Flujo ascendente (response flow)
+
+```mermaid
+graph TD
+    I[Infrastructure] --> R[Repository]
+    R --> U[Use Case]
+    U --> E[Domain Entity<br/>(Business Rules)]
+    E --> U
+    U --> B[Bloc]
+    B --> V[ViewState / ViewModel]
+    V --> W[Widget]
+```
+
+1. La infraestructura retorna datos.
+2. El repositorio los adapta al dominio.
+3. El dominio aplica reglas e invariantes.
+4. El resultado se transforma en estado de presentación.
+5. La UI se actualiza.
+
+## 🧠 Principio Clave
+
+El dominio nunca “va” a buscar datos.
+Los datos siempre son inyectados hacia él.
+
+Esto garantiza:
+
+- Inversión de dependencias
+- Testabilidad
+- Independencia de frameworks
+- Sustitución de infraestructura sin impacto en negocio
 
 ## 🎯 Cumplimiento de Requisitos Inamovibles
 
@@ -94,12 +245,38 @@ flutterfire configure --project="<your-project-id>"
     - App Distribution requiere configurar el plugin de Gradle en Android y subir builds desde Firebase CLI o Fastlane.
     - No se incluyen credenciales públicas en este repositorio; siga la guía oficial: https://firebase.google.com/products/app-distribution
 
-
 ---
 
-### Senior Reviewer Note
+## 📈 Escalabilidad: Evolución a Feature-First
 
-Esta implementación ha sido auditada para garantizar que no existan desviaciones arquitectónicas ni inconsistencias en el formato de datos enviado a los servicios de engagement.
+Aunque el MVP está organizado por capas globales, la arquitectura permite migrar fácilmente a una estructura feature-first sin reescribir lógica de negocio.
+
+```bash
+Estructura futura esperada
+lib/
+├── features/
+│   ├── onboarding/
+│   │   ├── domain/
+│   │   ├── data/
+│   │   └── presentation/
+│   │
+│   ├── analytics/
+│   │   ├── domain/
+│   │   ├── data/
+│   │   └── presentation/
+│
+└── shared/
+    └── core/
+```
+
+## Beneficios del enfoque feature-first
+
+- Encapsulamiento por módulo
+- Mejor mantenibilidad en productos grandes
+- Escalabilidad por equipo
+- Reducción de acoplamiento horizontal
+- La migración sería organizacional, no conceptual.
+- Clean Architecture se mantiene intacta.
 
 ---
 
@@ -113,19 +290,19 @@ Pasos rápidos para reproducir el entorno y validar requisitos automáticamente:
 flutter pub get
 ```
 
-1. Ejecutar análisis estático:
+2. Ejecutar análisis estático:
 
 ```bash
 flutter analyze
 ```
 
-1. Ejecutar tests unitarios/widget (incluye el widget smoke test):
+3. Ejecutar tests unitarios/widget (incluye el widget smoke test):
 
 ```bash
 flutter test --coverage
 ```
 
-1. Ejecutar en dispositivo Android conectado:
+4. Ejecutar en dispositivo Android conectado:
 
 ```bash
 flutter run -d android
