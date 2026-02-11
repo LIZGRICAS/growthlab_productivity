@@ -14,6 +14,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'presentation/bloc/growth_bloc.dart';
 import 'presentation/navigation/simple_router.dart';
 import 'presentation/navigation/router_service.dart';
+import 'presentation/widgets/lifecycle_listener.dart';
 
 Future<void> main() async {
   // Inicialización del sistema, bootstrap del sistema, no negocio.
@@ -94,16 +95,23 @@ class GrowthLabApp extends StatelessWidget {
           syncData: syncData,
           updateProfile: updateProfile,
         ),
-        child: MaterialApp.router(
-          routerDelegate: _routerDelegate,
-          routeInformationParser: _routeParser,
-          title: 'GrowthLab Productivity',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.indigo,
-              brightness: Brightness.light,
+        // Usamos Builder para obtener un contexto que esté por debajo del BlocProvider,
+        // de modo que LifecycleListener pueda acceder al GrowthBloc vía context.read<>()
+        child: Builder(
+          builder: (childContext) => LifecycleListener(
+            onStateChanged: (state) => childContext.read<GrowthBloc>().add(AppLifecycleChanged(state)),
+            child: MaterialApp.router(
+              routerDelegate: _routerDelegate,
+              routeInformationParser: _routeParser,
+              title: 'GrowthLab Productivity',
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(
+                useMaterial3: true,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: Colors.indigo,
+                  brightness: Brightness.light,
+                ),
+              ),
             ),
           ),
         ),

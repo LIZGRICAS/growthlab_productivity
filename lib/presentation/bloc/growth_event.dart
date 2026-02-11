@@ -11,6 +11,7 @@
 // En BLoC es importante para evitar emisiones duplicadas
 // y facilitar debugging y testing.
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 
 
 abstract class GrowthEvent extends Equatable {
@@ -60,4 +61,14 @@ class NavigationTabChanged extends GrowthEvent {
   // de modo que Equatable pueda comparar correctamente el evento.
   @override
   List<Object?> get props => [index];
+}
+
+// Evento emitido cuando cambia el estado del ciclo de vida de la app.
+// Se usa para que la UI (LifecycleListener) notifique al Bloc.
+class AppLifecycleChanged extends GrowthEvent {
+  final AppLifecycleState state;
+  const AppLifecycleChanged(this.state);
+
+  @override
+  List<Object?> get props => [state];
 }
