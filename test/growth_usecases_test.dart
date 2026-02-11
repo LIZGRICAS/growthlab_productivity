@@ -1,9 +1,23 @@
+/*
+  Test: growth_usecases_test.dart
+
+  Propósito:
+  - Verificar el comportamiento de los usecases del dominio:
+    * CreateUserProfileUseCase
+    * TrackProductivityUseCase
+    * SyncDataUseCase
+
+  Estrategia:
+  - Se utiliza un `MockAnalyticsRepo` para comprobar que cada usecase
+    invoque la llamada esperada al repositorio.
+*/
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:growthlab_productivity/domain/usecases/growth_usecases.dart';
 import 'package:growthlab_productivity/domain/repositories/analytics_repository.dart';
-import 'package:growthlab_productivity/domain/entities.dart';
+import 'package:growthlab_productivity/domain/entities/user_profile.dart';
 
 class MockAnalyticsRepo extends Mock implements AnalyticsRepository {}
 
@@ -15,17 +29,20 @@ void main() {
   });
 
   setUpAll(() {
-    registerFallbackValue(const UserProfile(name: 'X', identity: '0', email: 'x@x.com', phone: '0'));
+    // Fallback para mocktail
+    registerFallbackValue(UserProfile(name: 'X', identity: '0', email: 'x@x.com', phone: '0'));
   });
 
   test('CreateUserProfileUseCase calls repository.createUserProfile', () async {
     final usecase = CreateUserProfileUseCase(mockRepo);
-    final profile = const UserProfile(name: 'X', identity: '1', email: 'e@x.com', phone: '99');
+    final profile = UserProfile(name: 'X', identity: '1', email: 'e@x.com', phone: '99');
 
+    // Mock del repositorio y ejecución
     when(() => mockRepo.createUserProfile(any())).thenAnswer((_) async {});
 
     await usecase(profile);
 
+    // Verificamos que el repositorio recibió exactamente el perfil enviado
     verify(() => mockRepo.createUserProfile(profile)).called(1);
   });
 
@@ -36,6 +53,7 @@ void main() {
 
     await usecase();
 
+    // Verificamos que el evento 'Hola_mundo' fue enviado al repositorio
     verify(() => mockRepo.trackProductivityEvent('Hola_mundo', any())).called(1);
   });
 

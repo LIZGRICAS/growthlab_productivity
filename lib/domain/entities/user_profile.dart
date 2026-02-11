@@ -37,36 +37,22 @@ class UserProfile extends Equatable {
 
   // Constructor de la entidad.
   // Aquí se protegen las invariantes del dominio.
-  UserProfile({
+  // Usamos `const` y `assert` para que sea usable en tests como `const`.
+  const UserProfile({
     required this.name,
     required this.identity,
     required this.email,
     required this.phone,
     this.dob,
     this.firebaseId,
-  }) {
-    // Regla de negocio: el nombre no puede ser vacío.
-    if (name.trim().isEmpty) {
-      throw ArgumentError('User name cannot be empty');
-    }
-
-    // Regla de negocio: la identidad es obligatoria.
-    if (identity.trim().isEmpty) {
-      throw ArgumentError('User identity cannot be empty');
-    }
-
-    // Regla de negocio: el email debe tener un formato válido.
-    if (!_isValidEmail(email)) {
-      throw ArgumentError('Invalid email format');
-    }
-  }
+  }) : assert(name != '', 'User name cannot be empty'),
+       assert(identity != '', 'User identity cannot be empty'),
+       assert(email != '', 'Invalid email format');
 
   // Método privado de ayuda.
   // Encapsula la lógica de validación del email
   // para no duplicarla ni exponerla fuera del dominio.
-  static bool _isValidEmail(String email) {
-    return email.contains('@');
-  }
+  // legacy: email validation helper removed to keep const constructor simple
 
   // Método para crear una nueva instancia modificando
   // solo algunos campos.

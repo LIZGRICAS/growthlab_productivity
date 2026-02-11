@@ -1,3 +1,16 @@
+/*
+  Test: analytics_repository_impl_test.dart
+
+  Propósito:
+  - Verificar que `AnalyticsRepositoryImpl` orquesta correctamente las llamadas
+    a las distintas data sources (CleverTap, Firestore, Storage, REST).
+
+  Estructura:
+  - Setup: se crean mocks de cada DataSource y se instancia el repositorio con
+    esos mocks.
+  - Cada `test` valida un comportamiento puntual del repositorio en aislamiento.
+*/
+
 // ignore_for_file: missing_implementations
 
 import 'dart:typed_data';
@@ -10,7 +23,7 @@ import 'package:growthlab_productivity/data/datasources/clevertap_datasource.dar
 import 'package:growthlab_productivity/data/datasources/firebase_datasource.dart';
 import 'package:growthlab_productivity/data/datasources/firebase_storage_datasource.dart';
 import 'package:growthlab_productivity/data/datasources/rest_datasource.dart';
-import 'package:growthlab_productivity/domain/entities.dart';
+import 'package:growthlab_productivity/domain/entities/user_profile.dart';
 
 class MockCleverTap extends Mock implements CleverTapDataSource {}
 class MockFirebaseDS extends Mock implements FirebaseDataSource {}
@@ -39,7 +52,8 @@ void main() {
   });
 
   setUpAll(() {
-    registerFallbackValue(const UserProfile(name: 'X', identity: '0', email: 'x@x.com', phone: '0'));
+    // Fallbacks necesarios para mocktail cuando se usan `any()` con tipos
+    registerFallbackValue(UserProfile(name: 'X', identity: '0', email: 'x@x.com', phone: '0'));
     registerFallbackValue(Uint8List.fromList([]));
   });
 
@@ -60,6 +74,7 @@ void main() {
     verify(() => mockFirebase.saveToFirestore(profile)).called(1);
   });
 
+  // Verifica que `uploadProfilePhoto` delegue en Firebase Storage y retorne la URL
   test('uploadProfilePhoto returns download URL', () async {
     when(() => mockStorage.uploadBytes(any(), any(), contentType: any(named: 'contentType')))
       .thenAnswer((_) async => 'https://storage.example/photo.jpg');
@@ -70,6 +85,7 @@ void main() {
     verify(() => mockStorage.uploadBytes(any(), any(), contentType: any(named: 'contentType'))).called(1);
   });
 
+  // Verifica que `syncExternalData` llame al datasource REST y retorne la lista
   test('syncExternalData returns list from rest datasource', () async {
     when(() => mockRest.fetchExternalTasks()).thenAnswer((_) async => ['a','b']);
 

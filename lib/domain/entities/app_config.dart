@@ -1,9 +1,3 @@
-// Entidad de dominio que representa un usuario válido del sistema.
-// Extiende Equatable para permitir comparaciones por valor,
-// Protege sus invariantes (ej: identidad, email válido).
-// No conoce UI, infraestructura ni frameworks.
-// algo clave en dominio, tests y estado inmutable.
-
 import 'package:equatable/equatable.dart';
 
 // Entidad de dominio que representa la configuración activa del sistema.
