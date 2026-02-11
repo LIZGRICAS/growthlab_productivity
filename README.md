@@ -142,9 +142,8 @@ Este flujo ocurre cada vez que el usuario interactúa con la aplicación.
 graph TD
     W[Widget] --> B[Bloc]
     B --> U[Use Case]
-    U --> R[Repository<br/>(Domain Contract)]
-    R --> I[Infrastructure<br/>(API / DB / Cache)]
-
+    U --> R[Repository]
+    R --> I[Infrastructure]
 ```
 
 1. El usuario dispara un evento.
@@ -157,11 +156,11 @@ graph TD
 ```mermaid
 graph TD
     I[Infrastructure] --> R[Repository]
-    R --> U[Use Case]
-    U --> E[Domain Entity<br/>(Business Rules)]
+    R --> U["Use Case"]
+    U --> E["Domain Entity\n(Business Rules)"]
     E --> U
     U --> B[Bloc]
-    B --> V[ViewState / ViewModel]
+    B --> V["ViewState / ViewModel"]
     V --> W[Widget]
 ```
 
@@ -247,39 +246,6 @@ flutterfire configure --project="<your-project-id>"
 
 ---
 
-## 📈 Escalabilidad: Evolución a Feature-First
-
-Aunque el MVP está organizado por capas globales, la arquitectura permite migrar fácilmente a una estructura feature-first sin reescribir lógica de negocio.
-
-```bash
-Estructura futura esperada
-lib/
-├── features/
-│   ├── onboarding/
-│   │   ├── domain/
-│   │   ├── data/
-│   │   └── presentation/
-│   │
-│   ├── analytics/
-│   │   ├── domain/
-│   │   ├── data/
-│   │   └── presentation/
-│
-└── shared/
-    └── core/
-```
-
-## Beneficios del enfoque feature-first
-
-- Encapsulamiento por módulo
-- Mejor mantenibilidad en productos grandes
-- Escalabilidad por equipo
-- Reducción de acoplamiento horizontal
-- La migración sería organizacional, no conceptual.
-- Clean Architecture se mantiene intacta.
-
----
-
 ## 🧪 Cómo probar localmente (tests y ejecución)
 
 Pasos rápidos para reproducir el entorno y validar requisitos automáticamente:
@@ -340,3 +306,36 @@ class CleverTapDataSource {
     }
 }
 ```
+
+## 📈 Escalabilidad: Evolución a Feature-First
+
+Aunque el MVP está organizado por capas globales, la arquitectura permite migrar fácilmente a una estructura feature-first sin reescribir lógica de negocio.
+
+```bash
+Estructura futura esperada
+lib/
+├── features/
+│   ├── onboarding/
+│   │   ├── domain/
+│   │   ├── data/
+│   │   └── presentation/
+│   │
+│   ├── analytics/
+│   │   ├── domain/
+│   │   ├── data/
+│   │   └── presentation/
+│
+└── shared/
+    └── core/
+```
+
+## Beneficios del enfoque feature-first
+
+- Encapsulamiento por módulo
+- Mejor mantenibilidad en productos grandes
+- Escalabilidad por equipo
+- Reducción de acoplamiento horizontal
+- La migración sería organizacional, no conceptual.
+- Clean Architecture se mantiene intacta.
+
+---
